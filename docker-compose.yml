@@ -11,8 +11,6 @@ services:
       - N8N_HOST=localhost
       - N8N_PORT=5678
       - WEBHOOK_URL=http://localhost:5678/
-    volumes:
-      - ./n8n/data:/home/node/.n8n
     depends_on:
       - ollama
     restart: unless-stopped
