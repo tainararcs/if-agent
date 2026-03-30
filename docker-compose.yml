@@ -8,13 +8,28 @@ services:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=admin
-      - N8N_HOST=localhost
+      - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
-      - WEBHOOK_URL=http://localhost:5678/
+      - WEBHOOK_URL=http://172.19.0.1:5678/
+      - N8N_SKIP_DB_CHECKS=true
+      - N8N_BLOCK_NODES=
+      - N8N_NODES_EXCLUDE=[]
+      - PUPPETEER_EXECUTABLE_PATH=/root/.cache/puppeteer/chrome/linux-146.0.7680.153/chrome-linux64/chrome
+    volumes:
+      - ./n8n/data:/home/node/.n8n
+      - ./scripts:/home/node/scripts
     depends_on:
       - ollama
     restart: unless-stopped
-  
+    networks:
+      - app-network
+
+  browserless:
+    image: browserless/chrome:latest
+    container_name: browserless
+    restart: always
+    networks:
+      - app-network
 
   ollama:
     image: ollama/ollama:latest
@@ -24,3 +39,89 @@ services:
     volumes:
       - ./ollama:/root/.ollama
     restart: unless-stopped
+    networks:
+      - app-network
+
+  chatwoot:
+    image: chatwoot/chatwoot:latest
+    container_name: chatwoot
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=production
+      - SECRET_KEY_BASE=supersecretkey
+      - FRONTEND_URL=http://localhost:3000
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=chatwoot
+      - POSTGRES_DATABASE=chatwoot
+      - ALLOW_PRIVATE_IP_ACCESS=true
+    depends_on:
+      - postgres
+      - redis
+    command: >
+      sh -c "bundle exec rails db:prepare && bundle exec rails s -b 0.0.0.0 -p 3000"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7
+    container_name: chatwoot-redis
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  chatwoot-worker:
+    image: chatwoot/chatwoot:latest
+    container_name: chatwoot-worker
+    environment:
+      - RAILS_ENV=production
+      - SECRET_KEY_BASE=supersecretkey
+      - FRONTEND_URL=http://localhost:3000
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=chatwoot
+      - POSTGRES_DATABASE=chatwoot
+      - ALLOW_PRIVATE_IP_ACCESS=true
+    depends_on:
+      - postgres
+      - redis
+      - chatwoot
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: chatwoot-postgres
+    environment:
+      POSTGRES_DB: chatwoot
+      POSTGRES_USER: chatwoot
+      POSTGRES_PASSWORD: chatwoot
+    volumes:
+      - ./chatwoot/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: chatwoot-pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
