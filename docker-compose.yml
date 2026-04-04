@@ -11,15 +11,11 @@ services:
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - WEBHOOK_URL=http://172.19.0.1:5678/
-      - N8N_SKIP_DB_CHECKS=true
-      - N8N_BLOCK_NODES=
-      - N8N_NODES_EXCLUDE=[]
-      - PUPPETEER_EXECUTABLE_PATH=/root/.cache/puppeteer/chrome/linux-146.0.7680.153/chrome-linux64/chrome
     volumes:
       - ./n8n/data:/home/node/.n8n
-      - ./scripts:/home/node/scripts
     depends_on:
       - ollama
+      - browserless
     restart: unless-stopped
     networks:
       - app-network
@@ -27,6 +23,10 @@ services:
   browserless:
     image: browserless/chrome:latest
     container_name: browserless
+    environment:
+      - PREBOOT_CHROME=true
+      - DEFAULT_STEALTH=true
+      - DEFAULT_IGNORE_HTTPS_ERRORS=true
     restart: always
     networks:
       - app-network
