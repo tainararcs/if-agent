@@ -1,6 +1,6 @@
 services:
   n8n:
-    image: n8nio/n8n:latest
+    image: tainararcs/if-agent:n8n-1.0
     container_name: n8n
     ports:
       - "5678:5678"
