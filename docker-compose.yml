@@ -16,6 +16,7 @@ services:
     depends_on:
       - ollama
       - browserless
+      - postgres
     restart: unless-stopped
     networks:
       - app-network
@@ -50,13 +51,18 @@ services:
     environment:
       - RAILS_ENV=production
       - SECRET_KEY_BASE=supersecretkey
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=http://localhost:3000 # ou a urldo ngrok. Ex: https://blip-rumbling-gloss.ngrok-free.dev
       - REDIS_URL=redis://redis:6379
       - POSTGRES_HOST=postgres
       - POSTGRES_USERNAME=chatwoot
       - POSTGRES_PASSWORD=chatwoot
       - POSTGRES_DATABASE=chatwoot
       - ALLOW_PRIVATE_IP_ACCESS=true
+      # Variáveis para habilitar a rota do WhatsApp Cloud API
+      - FB_VERIFY_TOKEN=
+      - WHATSAPP_VERIFY_TOKEN=
+      - FB_APP_ID=
+      - FB_APP_SECRET=
     depends_on:
       - postgres
       - redis
