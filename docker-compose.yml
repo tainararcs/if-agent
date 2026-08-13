@@ -2,8 +2,7 @@ services:
   n8n:
     image: tainararcs/if-agent:n8n-2.0
     container_name: n8n
-    ports:
-      - "5678:5678"
+    ports: - "5678:5678"
     environment:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
@@ -35,8 +34,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
-    ports:
-      - "11434:11434"
+    ports: - "11434:11434"
     volumes:
       - ./ollama:/root/.ollama
     restart: unless-stopped
@@ -46,13 +44,12 @@ services:
   chatwoot:
     image: chatwoot/chatwoot:latest
     container_name: chatwoot
-    ports:
-      - "3000:3000"
+    ports: - "3000:3000"
     environment:
       - RAILS_ENV=production
       - SECRET_KEY_BASE=supersecretkey
       - FRONTEND_URL=http://localhost:3000 # ou a urldo ngrok. Ex: https://blip-rumbling-gloss.ngrok-free.dev
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://chatwoot-redis:6379
       - POSTGRES_HOST=postgres
       - POSTGRES_USERNAME=chatwoot
       - POSTGRES_PASSWORD=chatwoot
@@ -104,6 +101,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg15
     container_name: chatwoot-postgres
+    ports: - "5432:5432"
     environment:
       POSTGRES_DB: chatwoot
       POSTGRES_USER: chatwoot
@@ -117,8 +115,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: chatwoot-pgadmin
-    ports:
-      - "5050:80"
+    ports: - "5050:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
