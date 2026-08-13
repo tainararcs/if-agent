@@ -38,7 +38,6 @@ graph TD
 
 
 ## Tecnologias Utilizadas
-
 | Serviço | Imagem Docker | Função no Ecossistema |
 | :--- | :--- | :--- |
 | **n8n** | `n8nio/n8n:latest` | Fluxo lógico, gerenciamento de sessões e orquestração do RAG. |
@@ -84,7 +83,23 @@ docker exec -it ollama ollama pull nomic-embed-text
 
 ## Configuração da Sandbox da Meta (WhatsApp)
 
-Devido às políticas de Business Verification da Meta para contas corporativas, , será necessário que a empresa termine essa estapa ou utilizar o em ambiente de Sandbox:
-- Cadastre os números de teste no painel do Meta for Developers.
-- Configure o Webhook do Chatwoot no menu WhatsApp Cloud API apontando para a URL segura gerada pelo ngrok.
-- Assine os eventos principais (messages, message_template_status_update).
+Devido às políticas de Business Verification da Meta para contas corporativas, será necessário que a empresa termine essa estapa ou utilize o em ambiente de Sandbox:
+A integração com o WhatsApp exige um aplicativo cadastrado no [Meta for Developers](https://developers.facebook.com/). Pod-se seguir por dois caminhos, dependendo do seu objetivo:
+
+### Opção A: Ambiente de Testes (Sandbox/Modo Desenvolvedor)
+
+1. Acesse o [Meta for Developers](https://developers.facebook.com/) e crie um aplicativo do tipo **Outro** / **Conectar-se com clientes pelo WhatsApp**.
+2. Na aba **Configuração do WhatsApp**, utilize o **Número de Teste Gratuito** fornecido pela Meta.
+3. **Adicionar Destinatários (Allowlist):** Como o número de teste é restrito, cadastre manualmente os números de telefone dos testadores.
+4. **Configurar Webhook:**
+   - Cole a URL de Webhook gerada no Chatwoot (utilizando a URL do `ngrok` ou do seu domínio seguro).
+   - Insira o *Verify Token* configurado no Chatwoot (`Imbox Wpp Channel`).
+   - Assine os eventos obrigatórios: `messages` e `message_template_status_update`.
+
+### Opção B: Ambiente Oficial / Produção (Empresa / Instituição)
+
+1. **Verificação de Empresa (Business Verification):** No Gerenciador de Negócios da Meta (*Meta Business Suite*), conclua a etapa de verificação.
+2. **Adicionar Número Próprio:** Cadastre e valide o número de telefone oficial (comprado via SIM Card ou número fixo) recebendo o código de confirmação.
+3. **Configuração de Webhook e Produção:**
+   - Vincule a URL do Webhook do seu servidor de produção (`https://seu-dominio.com/webhooks/whatsapp`).
+   - Assine os eventos de mensagens (`messages`).
